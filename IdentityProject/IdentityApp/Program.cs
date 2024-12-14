@@ -1,4 +1,7 @@
+using IdentityApp.Entities;
 using IdentityApp.Repo;
+using IdentityApp.Repo.Authentication;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace IdentityApp
@@ -14,8 +17,11 @@ namespace IdentityApp
 
             string DefaultConnectionString = builder.Configuration["ConnectionStrings:DefaultConnection"]!;
             builder.Services.AddDbContext<IdentityContext>(options => options.UseSqlServer(DefaultConnectionString));
-
-
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                            .AddEntityFrameworkStores<IdentityContext>()
+                            .AddDefaultTokenProviders();
+            builder.Services.ConfigureApplicationCookie(option => option.LoginPath = "/Authentication/Login");
+            builder.Services.AddScoped<IUserAuthentication, UserAuthentication>();
 
 
             var app = builder.Build();
@@ -32,6 +38,8 @@ namespace IdentityApp
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 
